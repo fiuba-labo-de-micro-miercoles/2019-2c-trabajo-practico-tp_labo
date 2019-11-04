@@ -1,8 +1,8 @@
-Repositorio para la documentación de proyectos de
-6609/8607 Laboratorio de Microcontroladores
+Proyecto de Laboratorio de Microcontroladores
 
-  Integrantes Gonzalo García Cano 
-Proyecto: Multímetro Digital
+Multímetro Digital
+
+Gonzalo García Cano 
 
 La idea del proyecto es armar un multímetro capaz de
 medir tensión de continua y alterna, corriente y
