@@ -85,6 +85,7 @@ medir:
 	call show
 	ret
 load_mode:
+;carga en Modo el tipo de medicion en memoria
 	push r16
 	push r17
 	ldi xh, high(Modo)	;cargo la direccion de modo en x
@@ -125,6 +126,7 @@ end_loop_s_msg:
 	pop r16
 	ret
 convert:
+;guarda el resultado convertido en Mostrar
 	ldi r16,0 
 	sts PRR, r16;activo el adc
 	ldi r16,(1<<ADEN)|(1<<ADSC)|(1<<ADPS0)|(1<<ADPS1)|(1<<ADPS2)
@@ -151,6 +153,7 @@ not_ohm:
 	sts PRR, r16	;desactivo el adc
 	ret
 show:
+;muestra el contenido de Mostrar en el display
 	ldi r16, MOVE_SECOND_LCD
 	call CMD_WRITE
 	ldi xh, high(Mostrar)	;cargo la direccion de mostrar en x
