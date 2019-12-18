@@ -124,7 +124,11 @@ loop_s_msg:
 	rjmp loop_s_msg
 ERROR_m:
 	rcall ERROR_MSG	;cargo mensaje de error
-	rjmp loop
+	ldi r16,0b11000000	;salto al segundo renglon
+	call CMD_WRITE
+	pop r17
+	pop r16
+	ret
 iguales:
 	pop r17
 	pop r16
@@ -154,7 +158,7 @@ wait_adc:	;espero a que termine la conversion
 	st x+,r18		;guardo el resultado de la conversion en Leido
 	st x,r17
 	lds r17, ADMUX		;leo el modo
-	andi r17 , MASK_MUX
+	andi r17 , ~MASK_MUX
 	cpi r17, 0
 	brne not_ohm
 	rcall hex_to_ohm		; modo resistencia
