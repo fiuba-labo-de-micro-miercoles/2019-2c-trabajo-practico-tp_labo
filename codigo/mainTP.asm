@@ -29,61 +29,61 @@ Modo: .byte 1
 .org INT_VECTORS_SIZE
 
 main:
-		ldi r21,high(RAMEND)
-		out SPH,r21
-		ldi r21,low(RAMEND)
-		out SPL,r21
-		ldi r27,0X4E	;	0100 1110=0x4E
-		call I2C_INIT
-		call I2C_START
-		call I2C_WRITE ; Escribo dirección y W/R
-		ldi r27,0b00001100	;0x0C
-		call DELAY_PRUEBA
-		ldi r16, CONFIG_LCD_1
-		call CMD_WRITE
-		call DELAY_2MS
-		ldi r16, CONFIG_LCD_2
-		call CMD_WRITE
-		call DELAY_2MS
-		ldi r16, CONFIG_LCD_3
-		call CMD_WRITE
-		call DELAY_2MS
-		ldi r16, 0x0C
-		call CMD_WRITE
-		call DELAY_2MS
-		ldi r16, 0x01
-		call CMD_WRITE
-		call DELAY_2MS
-		ldi r16, 0x06
-		call CMD_WRITE	;termina la configuracion del lcd
-		ldi r16, 1; ----configuro el ADC-----------------
-		out PORTB, r16		;pull-up port b0
-		ldi r16,(1<<REFS0)
-		sts ADMUX,r16		;Vref=AVcc	y  canal 0 (acd0=pc0)	ADLAR  en 0
-		ldi r16,0
-		sts ADCSRB,r16	;free running mod
-		ldi r16, RESET_TIME_0			;cargo el valor a comparar L
-		sts OCR1AL, r16	
-		ldi r16, RESET_TIME_1			;cargo el valor a comparar H
-		sts OCR1AH, r16	
-		ldi r16 , (1<<OCIE1A)
-		sts TIMSK1 , r16			;activo interrupcion por comparacion A
-		ldi r16, (1<<WGM12)|(1<<CS12)|(1<<CS10)
-		sts TCCR1B , r16	;configuro timer 1	a 16Mhz/1024=15.6KHz modo ctc
-		ldi r16 , (1<<SE)
-		out  SMCR , r16	; activo sleep mode
+	ldi r21,high(RAMEND)
+	out SPH,r21
+	ldi r21,low(RAMEND)
+	out SPL,r21
+	ldi r27,0X4E	;	0100 1110=0x4E
+	call I2C_INIT
+	call I2C_START
+	call I2C_WRITE ; Escribo direcciÃ³n y W/R
+	ldi r27,0b00001100	;0x0C
+	call DELAY_PRUEBA
+	ldi r16, CONFIG_LCD_1
+	call CMD_WRITE
+	call DELAY_2MS
+	ldi r16, CONFIG_LCD_2
+	call CMD_WRITE
+	call DELAY_2MS
+	ldi r16, CONFIG_LCD_3
+	call CMD_WRITE
+	call DELAY_2MS
+	ldi r16, 0x0C
+	call CMD_WRITE
+	call DELAY_2MS
+	ldi r16, 0x01
+	call CMD_WRITE
+	call DELAY_2MS
+	ldi r16, 0x06
+	call CMD_WRITE	;termina la configuracion del lcd
+	ldi r16, 1; ----configuro el ADC-----------------
+	out PORTB, r16		;pull-up port b0
+	ldi r16,(1<<REFS0)
+	sts ADMUX,r16		;Vref=AVcc	y  canal 0 (acd0=pc0)	ADLAR  en 0
+	ldi r16,0
+	sts ADCSRB,r16	;free running mod
+	ldi r16, RESET_TIME_0			;cargo el valor a comparar L
+	sts OCR1AL, r16	
+	ldi r16, RESET_TIME_1			;cargo el valor a comparar H
+	sts OCR1AH, r16	
+	ldi r16 , (1<<OCIE1A)
+	sts TIMSK1 , r16			;activo interrupcion por comparacion A
+	ldi r16, (1<<WGM12)|(1<<CS12)|(1<<CS10)
+	sts TCCR1B , r16	;configuro timer 1	a 16Mhz/1024=15.6KHz modo ctc
+	ldi r16 , (1<<SE)
+	out  SMCR , r16	; activo sleep mode
 loop:
-		rcall medir		
-		sei ; activo interrupciones
-		sleep ; mando a modo idle, hasta la interrupcion
-		cli
-		rjmp loop
+	rcall medir		
+	sei ; activo interrupciones
+	sleep ; mando a modo idle, hasta la interrupcion
+	cli
+	rjmp loop
 
 medir:
-		call load_mode
-		call convert
-		call show
-		ret
+	call load_mode
+	call convert
+	call show
+	ret
 load_mode:
 	push r16
 	push r17
@@ -176,7 +176,6 @@ delay_m:		;delay de 120 ms
 	rcall DELAY_PRUEBA
 	rcall DELAY_PRUEBA
 	ret
-	call I2C_STOP
 	;**********************   Display  ***********************************;	
 I2C_INIT:	
 	;Configuro para que la frecuencia del clock sea 10 kHz
@@ -185,12 +184,13 @@ I2C_INIT:
 	ldi r21,198
 	sts TWBR,r21 ; TWBR vale 198
 	ldi r21,(1<<TWEN)
-	sts TWCR,r21 ;Este bit (TWEN) sirve para habilitar la comunicación i2c, SCL y SDA para i2c
+	sts TWCR,r21 ;Este bit (TWEN) sirve para habilitar la comunicaciÃ³n i2c, SCL y SDA para i2c
 ret
 ; *	*	*	*	*	*	*	*	*	*	*	*	*	*	* ;
 I2C_START:
+; Transmite la condiciÃ³n de start
 	ldi r21, (1<<TWINT)|(1<<TWSTA)|(1<<TWEN) ; cargo 10100100 en r21
-	sts TWCR,r21 ; transmite la condición de start
+	sts TWCR,r21 ; transmite la condiciÃ³n de start
 I2C_WAIT_1:
 	lds r21,TWCR
 	sbrs r21,TWINT
@@ -198,11 +198,13 @@ I2C_WAIT_1:
 ret ; Retorna cuando TWINT sea 1
 ; *	*	*	*	*	*	*	*	*	*	*	*	*	*	* ;
 I2C_STOP:
+; Transmite la condiciÃ³n de stop
 	ldi r21, (1<<TWINT)|(1<<TWSTO)|(1<<TWEN) ; esto es cargar  10010100 en r21
-	sts TWCR,r21 ; Transmite la condición de stop
+	sts TWCR,r21 ; Transmite la condiciÃ³n de stop
 ret
 ; *	*	*	*	*	*	*	*	*	*	*	*	*	*	* ;
 I2C_WRITE:
+;mandar datos con i2c (escritura)
 	sts TWDR,r27
 	ldi r21, (1<<TWINT)|(1<<TWEN)
 	sts TWCR,r21
@@ -212,7 +214,9 @@ I2C_WAIT_2:
 	rjmp I2C_WAIT_2
 ret ; Retorna cuando TWINT sea 1
 ; *	*	*	*	*	*	*	*	*	*	*	*	*	*	* ;
-CMD_WRITE:		;recibe en r16 el comando
+CMD_WRITE:		
+;manda comandos al display
+;recibe en r16 el comando
 	push r27
 	mov r27,r16
 	andi r27,0XF0	; Se queda con la parte alta del comando
@@ -238,7 +242,9 @@ CMD_WRITE:		;recibe en r16 el comando
 	pop r27
 ret
 
-DATA_WRITE:        ;recibe en r16 el dato 
+DATA_WRITE:        
+;manda datos al display
+;recibe en r16 el dato 
 	push r27
 	mov r27, r16
 	andi r27, MSBITS
@@ -264,7 +270,7 @@ DATA_WRITE:        ;recibe en r16 el dato
 	pop r27
 ret
 ;*********************************************************;
-DELAY_PRUEBA:	;40m2
+DELAY_PRUEBA:	;delay 40m2
 	push r17
 	ldi r17, 20
 LDR1:
@@ -316,9 +322,10 @@ hex_to_ascii:
 	ret
 num:
 	ldi r21,'0'	; cargo '0' en ascii
-	add r21,r20	;sumo r20 que está entre 0 y 9
+	add r21,r20	;sumo r20 que estÃ¡ entre 0 y 9
 	ret
-hex_to_ohm:		
+hex_to_ohm:
+;guarda en Mostrar el valor convertido a ohms de Leido  ADLAR = 0
 	push r20
 	push r21
 	push r22
@@ -481,7 +488,7 @@ Mensaje: .db "  Resistencia | Corriente  |  Tension  &"
 Mensaje_ERROR: .db "ERROR  &"
 
 hex_to_volt:
-		;guarda en Mostrar el valor convertido de Leido  ADLAR = 0
+	;guarda en Mostrar el valor convertido a volts de Leido  ADLAR = 0
 	push r20
 	push r21
 	push r22
