@@ -33,6 +33,19 @@ main:
 	out SPH,r21
 	ldi r21,low(RAMEND)
 	out SPL,r21
+	call config_display
+	call config_adc
+	call config_timer
+	ldi r16 , (1<<SE)
+	out  SMCR , r16	; activo sleep mode
+loop:
+	rcall medir		
+	sei ; activo interrupciones
+	sleep ; mando a modo idle, hasta la interrupcion
+	cli
+	rjmp loop
+config_display:
+;configura el display
 	ldi r27,0X4E	;	0100 1110=0x4E
 	call I2C_INIT
 	call I2C_START
@@ -56,12 +69,18 @@ main:
 	call DELAY_2MS
 	ldi r16, 0x06
 	call CMD_WRITE	;termina la configuracion del lcd
-	ldi r16, 1; ----configuro el ADC-----------------
+	ret
+config_adc:
+;configura el Adc
+	ldi r16, 1; 
 	out PORTB, r16		;pull-up port b0
 	ldi r16,(1<<REFS0)
 	sts ADMUX,r16		;Vref=AVcc	y  canal 0 (acd0=pc0)	ADLAR  en 0
 	ldi r16,0
 	sts ADCSRB,r16	;free running mod
+	ret
+config_timer:
+;configura el timer 1 y la interrupcion 
 	ldi r16, RESET_TIME_0			;cargo el valor a comparar L
 	sts OCR1AL, r16	
 	ldi r16, RESET_TIME_1			;cargo el valor a comparar H
@@ -70,15 +89,7 @@ main:
 	sts TIMSK1 , r16			;activo interrupcion por comparacion A
 	ldi r16, (1<<WGM12)|(1<<CS12)|(1<<CS10)
 	sts TCCR1B , r16	;configuro timer 1	a 16Mhz/1024=15.6KHz modo ctc
-	ldi r16 , (1<<SE)
-	out  SMCR , r16	; activo sleep mode
-loop:
-	rcall medir		
-	sei ; activo interrupciones
-	sleep ; mando a modo idle, hasta la interrupcion
-	cli
-	rjmp loop
-
+	ret
 medir:
 	call load_mode
 	call convert
