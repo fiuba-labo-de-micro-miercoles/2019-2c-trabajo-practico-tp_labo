@@ -20,7 +20,8 @@ Leido: .byte 2
 Mostrar: .byte 3
 Modo: .byte 1
 
-.cseg ; 
+.cseg ;
+.org 0
 	jmp main
 
 .org OC1Aaddr
